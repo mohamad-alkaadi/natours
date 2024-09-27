@@ -27,7 +27,7 @@ app.get('/api/v1/tours/:id', (req, res) => {
   const id = req.params.id * 1;
   const tour = tours.find((el) => el.id === id);
   if (!tour) {
-    return res.status(200).json({
+    return res.status(404).json({
       status: 'fail',
       massage: 'Invalid id',
     });
@@ -54,6 +54,24 @@ app.post('/api/v1/tours', (req, res) => {
   );
 });
 
+// we have two htp methods to update data (put, patch)
+// in put: we expect that our application receives the entire new updated object
+// in patch, we only expect the properties that should actually be updated on the object
+// patch is easer to update the properties
+app.patch('/api/v1/tours/:id', (req, res) => {
+  if (req.params.id * 1 > tours.length) {
+    return res.status(404).json({
+      status: 'fail',
+      massage: 'Invalid id',
+    });
+  }
+  res.status(200).json({
+    status: 'success',
+    data: {
+      tour: '<updated tour here>',
+    },
+  });
+});
 const port = 3000;
 app.listen(port, () => {
   console.log(`app running ono port ${port}`);
