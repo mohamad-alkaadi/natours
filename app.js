@@ -72,6 +72,22 @@ app.patch('/api/v1/tours/:id', (req, res) => {
     },
   });
 });
+// delete request
+app.delete('/api/v1/tours/:id', (req, res) => {
+  if (req.params.id * 1 > tours.length) {
+    return res.status(404).json({
+      status: 'fail',
+      massage: 'Invalid id',
+    });
+  }
+  // we send a response of data null o indicate that the data is no longer there
+  // it returns 204 and dont show anything on postman
+  res.status(204).json({
+    status: 'success',
+    data: null,
+  });
+});
+
 const port = 3000;
 app.listen(port, () => {
   console.log(`app running ono port ${port}`);
