@@ -3,6 +3,18 @@ const express = require('express');
 const app = express();
 
 app.use(express.json());
+// the next argument is always the third after req and res so we can call next what ever we want  like (n, x, etc...) and will still work like next
+// this rule also applies on req and response
+app.use((req, res, next) => {
+  console.log('hello from the middleware');
+  // if we don't call next here the request will be stuck here
+  next();
+});
+app.use((req, res, next) => {
+  // define a property on the request object
+  req.requestTime = new Date().toISOString();
+  next();
+});
 
 const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
@@ -11,6 +23,7 @@ const tours = JSON.parse(
 const getAllTours = (req, res) => {
   res.status(200).json({
     status: 'success',
+    requestedAt: req.requestTime,
     results: tours.length,
     data: {
       tours,
