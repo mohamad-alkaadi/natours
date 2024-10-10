@@ -37,7 +37,7 @@ const getAllTours = (req, res) => {
 };
 
 const getTour = (req, res) => {
-  console.log(req.params);
+  `console`.log(req.params);
   // when we multiply a string that is a number like '3' it will return a number
   const id = req.params.id * 1;
   const tour = tours.find((el) => el.id === id);
@@ -136,21 +136,25 @@ const deleteUser = (req, res) => {
 
 // 3) Routes
 
-app.route('/api/v1/tours').get(getAllTours).post(createTour);
+// tourRouter is a sub application
+// create a new router and save it to the variable
+const tourRouter = express.Router();
+// to connect our new router with our application we use it as middleware
+// the tour router only runs on this route
+// this is called: mounting the router: means mounting a new router on a route
+app.use('/api/v1/tours', tourRouter);
 
-app
-  .route('/api/v1/tours/:id')
-  .get(getTour)
-  .patch(updateTour)
-  .delete(deleteTour);
+tourRouter.route('/').get(getAllTours).post(createTour);
 
-app.route('/api/v1/users').get(getAllUsers).post(createUser);
+tourRouter.route('/:id').get(getTour).patch(updateTour).delete(deleteTour);
 
-app
-  .route('/api/v1/users/:id')
-  .get(getUser)
-  .patch(updateUser)
-  .delete(deleteUser);
+// ------------------------------------------------
+const userRouter = express.Router();
+app.use('/api/v1/users', userRouter);
+
+userRouter.route('/').get(getAllUsers).post(createUser);
+
+userRouter.route('/:id').get(getUser).patch(updateUser).delete(deleteUser);
 
 // 4)  Start server
 
