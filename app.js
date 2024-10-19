@@ -6,7 +6,10 @@ const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 
 // 1) Middlewares
-app.use(morgan('dev'));
+console.log(process.env.NODE_ENV);
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
 app.use(express.json());
 // we use express.static middleware in order to serve static files
 // when we use the public folder we use the url http://127.0.0.1:3000/overview.html
