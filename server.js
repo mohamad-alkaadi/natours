@@ -51,9 +51,8 @@ const Tour = mongoose.model('Tour', tourSchema);
 // to create a new document
 // testTour document is an instance of the Tour model
 const testTour = new Tour({
-  name: ' The Forest Hiker',
-  rating: 4.7,
-  price: 497,
+  name: ' The Park Camper',
+  price: 997,
 });
 
 // in order to save the document to the database
