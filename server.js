@@ -48,6 +48,24 @@ const tourSchema = new mongoose.Schema({
 // it should start with upper case
 const Tour = mongoose.model('Tour', tourSchema);
 
+// to create a new document
+// testTour document is an instance of the Tour model
+const testTour = new Tour({
+  name: ' The Forest Hiker',
+  rating: 4.7,
+  price: 497,
+});
+
+// in order to save the document to the database
+// the save() will return a promise tat can be consumed with then()
+// the resolve value of the promise is the final document as it is in the database.
+testTour
+  .save()
+  .then((doc) => {
+    console.log(doc);
+  })
+  .catch((err) => console.log('ERROR:', err));
+
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`app running ono port ${port}`);
