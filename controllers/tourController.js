@@ -60,20 +60,42 @@ exports.createTour = async (req, res) => {
   }
 };
 
-exports.updateTour = (req, res) => {
-  res.status(200).json({
-    status: 'success',
-    data: {
-      tour: '<updated tour here>',
-    },
-  });
+exports.updateTour = async (req, res) => {
+  try {
+    // we want to query the document  we want to update and update it
+    // third arg is options
+    const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+      // the newly updated document will be returned
+      new: true,
+      // to validate the input if it supposed to be an int you can make it string
+      runValidators: true,
+    });
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        tour: tour,
+      },
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err,
+    });
+  }
 };
 
-exports.deleteTour = (req, res) => {
-  // we send a response of data null o indicate that the data is no longer there
-  // it returns 204 and don't show anything on postman
-  res.status(204).json({
-    status: 'success',
-    data: null,
-  });
+exports.deleteTour = async (req, res) => {
+  try {
+    await Tour.findByIdAndDelete(req.params.id);
+    res.status(204).json({
+      status: 'success',
+      data: null,
+    });
+  } catch (err) {
+    res.status(400).json({
+      status: 'fail',
+      message: err,
+    });
+  }
 };
