@@ -10,11 +10,20 @@ exports.getAllTours = async (req, res) => {
     // to do that we loop over this fields and delete them from the query object using forEach and we use forEach because we don't want to return an array
     excludedFields.forEach((el) => delete queryObj[el]);
     // we use the new queryObj instead of req.query because there is no exclusion in req.query
-    const query = Tour.find(queryObj);
+
+    // we convert the object into a string
+
+    let queryStr = JSON.stringify(queryObj);
+    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
+    console.log(JSON.parse(queryStr));
+
+    // \b to match the exact word and not a part of another word
+    // \g means global meaning it will match all the word in the string not just the first one
+    const query = Tour.find(JSON.parse(queryStr));
     //our code
     //execute query
     const tours = await query;
-
+    // { duration: { gte: '7' } }
     //response
     res.status(200).json({
       status: 'success',
