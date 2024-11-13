@@ -17,13 +17,31 @@ exports.getAllTours = async (req, res) => {
     queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
     console.log(JSON.parse(queryStr));
 
-    // \b to match the exact word and not a part of another word
-    // \g means global meaning it will match all the word in the string not just the first one
-    const query = Tour.find(JSON.parse(queryStr));
-    //our code
+    let query = Tour.find(JSON.parse(queryStr));
+
+    // sorting
+    // query.sort is like query.find or Tours.find
+    // req.query.sort is passed by the api : 127.0.0.1:3000/api/v1/tours?sort=price
+    //its like we write Tours.find().sort(price) or Tours.find().sort(req.query.sort)
+    // this will write it in asending order
+    //to make it descending we use - before the field name in the api meaning :  127.0.0.1:3000/api/v1/tours?sort=-price
+    // sometimes we need to have multiple sorts
+    // multiple sorts should look like this Tours.find().sort('price ratingsAverage')
+    // so we use a comma between them like this : 127.0.0.1:3000/api/v1/tours?sort=-price,ratingsAverage
+    //  and then replace the comma with space in javascript
+
+    if (req.query.sort) {
+      const sortBy = req.query.sort.split(',').join(' ');
+      console.log(sortBy);
+      query = query.sort(sortBy);
+    } else {
+      // if user doesn't sort we sort default by created date
+      query = query.sort('-createdAt');
+    }
+
     //execute query
     const tours = await query;
-    // { duration: { gte: '7' } }
+
     //response
     res.status(200).json({
       status: 'success',
