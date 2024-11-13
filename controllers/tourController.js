@@ -2,7 +2,20 @@ const Tour = require('./../models/tourModel');
 
 exports.getAllTours = async (req, res) => {
   try {
-    const tours = await Tour.find();
+    console.log(req.query);
+    // we need to exclude a certain  query parameters so the database don't search for it and we can use them for other stuff
+    const queryObj = { ...req.query };
+    const excludedFields = ['page', 'sort', 'limit', 'fields'];
+    // now we remove all this field from our query object
+    // to do that we loop over this fields and delete them from the query object using forEach and we use forEach because we don't want to return an array
+    excludedFields.forEach((el) => delete queryObj[el]);
+    // we use the new queryObj instead of req.query because there is no exclusion in req.query
+    const query = Tour.find(queryObj);
+    //our code
+    //execute query
+    const tours = await query;
+
+    //response
     res.status(200).json({
       status: 'success',
       results: tours.length,
