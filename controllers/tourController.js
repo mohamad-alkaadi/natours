@@ -39,6 +39,18 @@ exports.getAllTours = async (req, res) => {
       query = query.sort('-createdAt');
     }
 
+    //Limiting Fields // to allow clients to choose which fields they want to get back in the response
+    if (req.query.fields) {
+      const fields = req.query.fields.split(',').join(' ');
+
+      query = query.select(fields);
+      // query = query.select('name duration price')
+    } else {
+      // if we want to exclude something we use - before the field name
+      // this is a field that mongodb automatically adds and we don't want to see it in the result
+      query = query.select('-__v');
+    }
+
     //execute query
     const tours = await query;
 
