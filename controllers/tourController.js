@@ -51,6 +51,28 @@ exports.getAllTours = async (req, res) => {
       query = query.select('-__v');
     }
 
+    // pagination
+    // api call: 127.0.0.1:3000/api/v1/tours?page=2&limit=10
+    // this means we skip 10 results to arrive to page 2
+    // result 1-10 ==> page 1 , 11 ==> 20 page 2
+    // pagination code example: query = query.skip(10).limit(10)
+    // limit is the amount of results we want in the query
+    // skip is the amount of result that should be skipped before querying data
+
+    // to convert a string to a number we multiply by 1
+    const page = req.query.page * 1;
+    //  || 100 meaning if there is no limit the default is 100
+    const limit = req.query.limit * 1 || 100;
+    const skip = (page - 1) * limit;
+
+    query = query.skip(skip).limit(limit);
+
+    if (req.query.page) {
+      // this will return the number of documents that we have
+      const numTours = await Tour.countDocuments();
+      // throw new error will immediately skip to the catch block
+      if (skip >= numTours) throw new Error('This age does not exist');
+    }
     //execute query
     const tours = await query;
 
