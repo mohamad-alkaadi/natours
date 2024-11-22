@@ -18,7 +18,6 @@ exports.getAllTours = async (req, res) => {
       .limitFields()
       .paginate();
 
-    // we await the result of features
     const tours = await features.query;
 
     //response
@@ -39,8 +38,6 @@ exports.getAllTours = async (req, res) => {
 
 exports.getTour = async (req, res) => {
   try {
-    // findById is a shorthand for writing findOne({_id: req.params.id})
-    // _id is written like this because its how mongodb names id
     const tour = await Tour.findById(req.params.id);
     res.status(200).json({
       status: 'success',
@@ -57,13 +54,6 @@ exports.getTour = async (req, res) => {
 };
 
 exports.createTour = async (req, res) => {
-  // const newTours = new Tour({})
-  // newTours.save()
-
-  //second method
-  // Tour.create({});
-  // it returns a promise and instead of .then() we are going to use async await
-
   try {
     const newTour = await Tour.create(req.body);
 
@@ -81,12 +71,8 @@ exports.createTour = async (req, res) => {
 
 exports.updateTour = async (req, res) => {
   try {
-    // we want to query the document  we want to update and update it
-    // third arg is options
     const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-      // the newly updated document will be returned
       new: true,
-      // to validate the input if it supposed to be an int you can make it string
       runValidators: true,
     });
 
@@ -122,29 +108,13 @@ exports.deleteTour = async (req, res) => {
 // AGGREGATION PIPELINE
 exports.getTourStats = async (req, res) => {
   try {
-    // its like a query but the difference that we can manipulate data in different steps
-    // we pass the aggregate function an array of the stages
-    // you can find these stages in https://www.mongodb.com/docs/manual/reference/operator/aggregation-pipeline/
-    // you need to await for it to work
     const stats = await Tour.aggregate([
       {
-        // the match stage is used to filter the documents
         $match: { ratingsAverage: { $gte: 4.5 } },
       },
       {
-        // it allows us to group documents together basically using accumulators
-        // we can group for example by difficulty level or by price
-        // we want to group the averages for all the tours in one big group
-        // avg is a keyword
         $group: {
-          // to group the results using fields we put the name of the field we want to group by in the id
-          // for example we want to group using the rating difficulty level
-          // _id: '$ratingsAverage',
-          // or we can group them by difficulty level
-          // _id: '$difficulty',
-          //also we can convert the result to uppercase
           _id: { $toUpper: '$difficulty' },
-          // we add one for each documenets using $sum: 1
           num: { $sum: 1 },
           numRatings: { $sum: '$ratingsQuantity' },
           avgRating: { $avg: '$ratingsAverage' },
@@ -152,22 +122,72 @@ exports.getTourStats = async (req, res) => {
           minPrice: { $min: '$price' },
           maxPrice: { $max: '$price' },
         },
-        // in the sort we need to use the fields the we created in the group stage, we sort the grouped fileds
       },
       {
         $sort: {
-          avgPrice: 1, // 1 is ascending, -1 is descending
+          avgPrice: 1,
         },
       },
-      // {
-      //   // we can do stages more than one
-      //$NE ===> NOT EQUAL
-      //   $match: { _id: { $ne: 'EASY' } },
-      // },
     ]);
     res.status(200).json({
       status: 'success',
       data: { stats },
+    });
+  } catch (err) {
+    res.status(404).json({
+      status: 'fail',
+      message: err,
+    });
+  }
+};
+
+// make us a function that calculates the busiest month of a given year
+// this is a business problem that we can solve using aggregation pipeline
+
+exports.getMonthlyPlan = async (req, res) => {
+  try {
+    const year = req.params.year * 1; // 2021
+    const plan = await Tour.aggregate([
+      {
+        // unwind deconstruct an array field from the info documents and then output one document for each element of the array
+        $unwind: '$startDates',
+      },
+      {
+        $match: {
+          startDates: {
+            $gte: new Date(`${year}-01-01`),
+            $lte: new Date(`${year}-12-31`),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: { $month: '$startDates' },
+          numTourStarts: { $sum: 1 },
+          // if we want to add the names of the tours to an array
+          tours: { $push: '$name' },
+        },
+      },
+      // to ASSIGN THE VALUE OF _id TO ANOTHER FIELD
+      {
+        $addFields: { month: '$_id' },
+      },
+      //after assigning the value to new field we want to hide the _id from showing in the output
+      {
+        $project: {
+          _id: 0,
+        },
+      },
+      {
+        $sort: { numTourStarts: -1 },
+      },
+      {
+        $limit: 12, // only return the top 6 busiest months //;imit the number of months // we put 12 to return all just for example
+      },
+    ]);
+    res.status(200).json({
+      status: 'success',
+      data: { plan },
     });
   } catch (err) {
     res.status(404).json({

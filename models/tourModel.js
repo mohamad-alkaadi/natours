@@ -47,7 +47,7 @@ const tourSchema = new mongoose.Schema({
     default: Date.now(),
     select: false,
   },
-  startDate: [Date], // accepted date format "2021-03-21, 11:32"
+  startDates: [Date], // accepted date format "2021-03-21, 11:32"
 });
 
 const Tour = mongoose.model('Tour', tourSchema);
