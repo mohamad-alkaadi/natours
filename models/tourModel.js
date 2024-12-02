@@ -7,6 +7,9 @@ const tourSchema = new mongoose.Schema(
       required: true,
       unique: true,
       trim: true,
+      // validation
+      maxlength: [40, 'a tour name must have less or equal than 40 characters'],
+      minlength: [10, 'a tour name must have more or equal than 10 characters'],
     },
     slug: String,
     duration: {
@@ -20,8 +23,22 @@ const tourSchema = new mongoose.Schema(
     difficulty: {
       type: String,
       required: [true, 'A tour must have a difficulty'],
+      //validation
+      //we want to restruct the input into 'easy','medium', 'difficult
+      // enum only works for strings
+      enum: {
+        values: ['easy', 'medium', 'difficult'],
+        message: 'Difficulty is either: easy, medium, difficult',
+      },
     },
-    ratingsAverage: { type: Number, default: 4.5 },
+    ratingsAverage: {
+      type: Number,
+      default: 4.5,
+      //validation
+      // min and max works with numbers and dates
+      min: [1, 'Rating must be above 1.0'],
+      max: [5, 'Rating must be below 5.0'],
+    },
     ratingsQuantity: { type: Number, default: 0 },
     price: {
       type: Number,
@@ -71,34 +88,21 @@ tourSchema.pre('save', function (next) {
 });
 
 // QUERY MIDDLEWARE
-// the 'find' parameter will make it a query middleware not a document middleware
-// the 'find' parameter means we wand to run this middleware before the 'find' query
-// example the we want to make secret tour in our database for very small vip group of people
-// and we don't want our secret tours to appear in the result of our public route
-//so we want to create a secret tour field and then query only for tours that are not secret
-// tourSchema.pre('find', function (next) {
-// if we want to make it work on all of the find queries: find, findOne, findMany, findById ... we use regular expressions
 tourSchema.pre(/^find/, function (next) {
   this.find({ secretTour: { $ne: true } });
   this.start = Date.now();
   next();
 });
-// in the post find middleware we have access to all the documents that were found in our query
-// this wil run post the find method
+
 tourSchema.post(/^find/, function (docs, next) {
   console.log(`Query took ${Date.now() - this.start} milliseconds`);
-
   console.log(docs);
 
   next();
 });
 // AGGREGATION MIDDLEWARE
-// aggregation middleware allows us to add hooks before or after an aggregation happens
-// we also want to execulde the secret tours in our aggregation pipline
 
 tourSchema.pre('aggregate', function (next) {
-  // to access the pipeline array we use the 'this.pipeline'
-  // to add an element at the beginning of the array we use unshift, we use shift to add at the last element
   this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
   console.log(this.pipeline());
   next();
