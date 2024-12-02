@@ -92,6 +92,17 @@ tourSchema.post(/^find/, function (docs, next) {
 
   next();
 });
+// AGGREGATION MIDDLEWARE
+// aggregation middleware allows us to add hooks before or after an aggregation happens
+// we also want to execulde the secret tours in our aggregation pipline
+
+tourSchema.pre('aggregate', function (next) {
+  // to access the pipeline array we use the 'this.pipeline'
+  // to add an element at the beginning of the array we use unshift, we use shift to add at the last element
+  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+  console.log(this.pipeline());
+  next();
+});
 
 const Tour = mongoose.model('Tour', tourSchema);
 
