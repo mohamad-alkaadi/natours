@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
+const validator = require('validator');
 const tourSchema = new mongoose.Schema(
   {
     name: {
@@ -10,6 +11,7 @@ const tourSchema = new mongoose.Schema(
       // validation
       maxlength: [40, 'a tour name must have less or equal than 40 characters'],
       minlength: [10, 'a tour name must have more or equal than 10 characters'],
+      // validator: [validator.isAlpha, 'Tour name must only contain characters'],
     },
     slug: String,
     duration: {
@@ -44,7 +46,20 @@ const tourSchema = new mongoose.Schema(
       type: Number,
       required: [true, 'A true must have a name'],
     },
-    priceDiscount: Number,
+    // we want to validate if the price discount is lower than the price itself
+    priceDiscount: {
+      type: Number,
+      // val refers to the value of priceDiscount
+      validate: {
+        // the function has access to the current document only on create so it will not work on update (meaning the "this" keyword only works on document creation not update)
+        validator: function (val) {
+          return val < this.price; // this refers to the current document
+          // it returns true or false depending on the validation
+        },
+        // we can access the value of the priceDiscount in strings using ({}) it is a special feature in mongoose
+        message: 'Discount price ({VALUE}) should be below the regular price',
+      },
+    },
     summary: {
       type: String,
       // it will remove all the white space in the beginning and in the end of the string
