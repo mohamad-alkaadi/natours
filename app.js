@@ -18,11 +18,7 @@ app.use(express.json());
 app.use(express.static(`${__dirname}/public`));
 // the next argument is always the third after req and res so we can call next what ever we want  like (n, x, etc...) and will still work like next
 // this rule also applies on req and response
-app.use((req, res, next) => {
-  console.log('hello from the middleware');
-  // if we don't call next here the request will be stuck here
-  next();
-});
+
 app.use((req, res, next) => {
   // define a property on the request object
   req.requestTime = new Date().toISOString();
@@ -34,4 +30,18 @@ app.use((req, res, next) => {
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 
+// we put this at the end of the file because we want to catch any routes that we haven't defined yet
+// we always do this at the end of the file
+// this is an error handler or not defined handler
+// we do this for unhandled routes
+// instead of writing a error handler for each method get() post() patch() etc... wr put all() to select all methods
+//  * means all routes
+// we do this to get a json response instead of http
+app.all('*', (req, res, next) => {
+  res.status(404).json({
+    status: 'fail',
+    message: `Can't find ${req.originalUrl} on ths server!`,
+  });
+  next();
+});
 module.exports = app;
