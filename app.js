@@ -38,10 +38,34 @@ app.use('/api/v1/users', userRouter);
 //  * means all routes
 // we do this to get a json response instead of http
 app.all('*', (req, res, next) => {
-  res.status(404).json({
-    status: 'fail',
-    message: `Can't find ${req.originalUrl} on ths server!`,
-  });
-  next();
+  // res.status(404).json({
+  //   status: 'fail',
+  //   message: `Can't find ${req.originalUrl} on ths server!`,
+  // });
+
+  // next();
+
+  // we can pass the Error a string and it will become err.message
+  const err = new Error(`Can't find ${req.originalUrl} on ths server!`);
+  err.status = 'fail';
+  err.statusCode = 404;
+  // if next() receives an argument express will automatically know that is an error
+  // and it ignore any other middleware after it and will automatically go to the global error handling middleware and it will get executed
+  next(err);
 });
+
+// defining our error handling middleware
+// error handling middleware has access to 4 parameters req, res, next, error
+// when you put 4 parameters in the middleware express automatically knows that is an error middleware
+app.use((err, req, res, next) => {
+  // we define the default status code
+  // this means if express knows the error it will provide it to us if not return 500
+  err.statusCode = err.statusCode || 500;
+  err.status = err.status || 'error';
+  res.status(err.statusCode).json({
+    status: err.status,
+    message: err.message,
+  });
+});
+
 module.exports = app;
