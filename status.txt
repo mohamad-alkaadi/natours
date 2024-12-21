@@ -1,0 +1,54 @@
+before this step if you enter a valid id to the api but it doesent exist in the database
+it returns null
+
+ex:
+127.0.0.1:3000/api/v1/tours/674060406b3cf8329007cb34
+
+output:
+{
+    "status": "success",
+    "data": {
+        "tour": {
+            "ratingsAverage": 4.8,
+            "ratingsQuantity": 23,
+            "images": [
+                "tour-2-1.jpg",
+                "tour-2-2.jpg",
+                "tour-2-3.jpg"
+            ],
+            "startDates": [
+                "2021-06-19T06:00:00.000Z",
+                "2021-07-20T06:00:00.000Z",
+                "2021-08-18T06:00:00.000Z"
+            ],
+            "secretTour": false,
+            "_id": "674060406b3cf8329007cb34",
+            "name": "The Sea Explorer",
+            "duration": 7,
+            "maxGroupSize": 15,
+            "difficulty": "medium",
+            "price": 497,
+            "summary": "Exploring the jaw-dropping US east coast by foot and by boat",
+            "description": "Consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.\nIrure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+            "imageCover": "tour-2-cover.jpg",
+            "__v": 0,
+            "durationWeeks": 1,
+            "id": "674060406b3cf8329007cb34"
+        }
+    }
+}
+
+if we change on number to still be a valid id but it doesent exist in the database it returns null
+ex: change the last 4 to 0
+127.0.0.1:3000/api/v1/tours/674060406b3cf8329007cb30
+
+output:
+{
+    "status": "success",
+    "data": {
+        "tour": null
+    }
+}
+
+so we need to solve it 
+we want to return 404

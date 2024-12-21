@@ -1,7 +1,7 @@
 const Tour = require('./../models/tourModel');
 const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('./../utils/catchAsync');
-
+const AppError = require('./../utils/appError');
 exports.aliasTopTours = (req, res, next) => {
   req.query.limit = '5';
   req.query.sort = '-ratingsAverage,price';
@@ -20,7 +20,7 @@ exports.getAllTours = catchAsync(async (req, res, next) => {
     .paginate();
 
   const tours = await features.query;
-
+  // there no need to send an error if the user asks for all tours so we don't need to write a 404 error if there is error it will be catched by catchAsync
   //response
   res.status(200).json({
     status: 'success',
@@ -33,6 +33,12 @@ exports.getAllTours = catchAsync(async (req, res, next) => {
 
 exports.getTour = catchAsync(async (req, res, next) => {
   const tour = await Tour.findById(req.params.id);
+  //in javascript null is falsy value so we can make it a condition
+  if (!tour) {
+    // to exit the function we write return
+    return next(new AppError('No tour found with that ID', 404));
+  }
+
   res.status(200).json({
     status: 'success',
     data: {
@@ -55,7 +61,10 @@ exports.updateTour = catchAsync(async (req, res, next) => {
     new: true,
     runValidators: true,
   });
-
+  if (!tour) {
+    // to exit the function we write return
+    return next(new AppError('No tour found with that ID', 404));
+  }
   res.status(200).json({
     status: 'success',
     data: {
@@ -65,7 +74,12 @@ exports.updateTour = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteTour = catchAsync(async (req, res, next) => {
-  await Tour.findByIdAndDelete(req.params.id);
+  // normally we don't need to store the response of the delete but now we need it to check if the tour was deleted
+  const tour = await Tour.findByIdAndDelete(req.params.id);
+  if (!tour) {
+    // to exit the function we write return
+    return next(new AppError('No tour found with that ID', 404));
+  }
   res.status(204).json({
     status: 'success',
     data: null,

@@ -1,3 +1,4 @@
+//this only works for async functions
 // instead of writing try catch blocks for each code with same error handling
 //we write a function for handling errors
 //this function is for catching async errors
