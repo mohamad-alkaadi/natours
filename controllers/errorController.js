@@ -1,3 +1,11 @@
+const AppError = require('./../utils/appError');
+const handleCastErrorDB = (err) => {
+  //path contains the field name for example id
+  // value contains the value that we are trying to input for example 1ef23523g234523as ' this an id for example'
+  //we took path and value from the error object you can see it returned in postman
+  const message = `Invalid ${err.path}: ${err.value}`;
+  return new AppError(message, 400);
+};
 const sendErrorDev = (err, res) => {
   res.status(err.statusCode).json({
     status: err.status,
@@ -35,6 +43,10 @@ module.exports = (err, req, res, next) => {
   if (process.env.NODE_ENV === 'development') {
     sendErrorDev(err, res);
   } else if (process.env.NODE_ENV === 'production') {
-    sendErrorProd(err, res);
+    // we want to reassign the error so we make a hard copy of it becouse it's not a good practace to change the orginal one
+    let error = { ...err };
+    if (error.name === 'CastError') error = handleCastErrorDB(error);
+
+    sendErrorProd(error, res);
   }
 };
