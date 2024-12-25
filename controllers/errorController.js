@@ -6,6 +6,29 @@ const handleCastErrorDB = (err) => {
   const message = `Invalid ${err.path}: ${err.value}`;
   return new AppError(message, 400);
 };
+
+const handleDuplicateFieldsDB = (err) => {
+  // we have a value in the error object
+  // "message": "E11000 duplicate key error collection: natours.tours index: name_1 dup key: { name: \"The Forest Hiker\" }"
+  // we want to extract the name of the tour for example
+  //the return of the regex
+  // [
+  //   '"The Forest Hiker"',
+  //   '"',
+  //   'r',
+  //   index: 84,
+  //   input: 'E11000 duplicate key error collection: natours.tours index: name_1 dup key: { name: "The Forest Hiker" }',
+  //   groups: undefined
+  // ]
+  //we want the first element of the array
+  //[0] to return the first element of the array
+  const value = err.errmsg.match(/(["'])(\\?.)*?\1/)[0];
+  console.log(value);
+
+  const message = `Duplicate field value: ${value}, Please use another value!`;
+  return new AppError(message, 400);
+};
+
 const sendErrorDev = (err, res) => {
   res.status(err.statusCode).json({
     status: err.status,
@@ -45,7 +68,9 @@ module.exports = (err, req, res, next) => {
   } else if (process.env.NODE_ENV === 'production') {
     // we want to reassign the error so we make a hard copy of it becouse it's not a good practace to change the orginal one
     let error = { ...err };
+    if (err.errmsg) error.errmsg = err.errmsg;
     if (error.name === 'CastError') error = handleCastErrorDB(error);
+    if (error.code === 11000) error = handleDuplicateFieldsDB(error);
 
     sendErrorProd(error, res);
   }
