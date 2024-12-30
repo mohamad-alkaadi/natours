@@ -29,6 +29,49 @@ const handleDuplicateFieldsDB = (err) => {
   return new AppError(message, 400);
 };
 
+const handleValidationErrorDB = (err) => {
+  //we want to create one big string out of all the strings from all the errors
+  // we have to loop over all the objects returned and then extract all the error messages into a new array
+  // in javascript we use Object.values in order to basically loop over an object
+  // Object.values is these objects
+  // "error": {
+  //   "errors": {
+  //       "ratingsAverage": {
+  //           "name": "ValidatorError",
+  //           "message": "Rating must be below 5.0",
+  //           "properties": {
+  //               "message": "Rating must be below 5.0",
+  //               "type": "max",
+  //               "max": 5,
+  //               "path": "ratingsAverage",
+  //               "value": 7
+  //           },
+  //           "kind": "max",
+  //           "path": "ratingsAverage",
+  //           "value": 7
+  //       },
+  //       "name": {
+  //           "name": "ValidatorError",
+  //           "message": "a tour name must have more or equal than 10 characters",
+  //           "properties": {
+  //               "message": "a tour name must have more or equal than 10 characters",
+  //               "type": "minlength",
+  //               "minlength": 10,
+  //               "path": "name",
+  //               "value": "no"
+  //           },
+  //           "kind": "minlength",
+  //           "path": "name",
+  //           "value": "no"
+  //       }
+  //   },
+  // then we map thee message part of each object to an array
+  const errors = Object.values(err.errors).map((el) => el.message);
+  // errors.join () will join all the strings in the array into one string
+  const message = `Invalid input data. ${errors.join('. ')}`;
+  return new AppError(message, 400);
+};
+
 const sendErrorDev = (err, res) => {
   res.status(err.statusCode).json({
     status: err.status,
@@ -71,7 +114,7 @@ module.exports = (err, req, res, next) => {
     if (err.errmsg) error.errmsg = err.errmsg;
     if (error.name === 'CastError') error = handleCastErrorDB(error);
     if (error.code === 11000) error = handleDuplicateFieldsDB(error);
-
+    if (err.name === 'ValidationError') error = handleValidationErrorDB(error);
     sendErrorProd(error, res);
   }
 };
