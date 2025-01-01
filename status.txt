@@ -1,58 +1,69 @@
-in the updateTour if we enter rating that is larger or smaller than the range specified
-and also if we enter a name
+Imagine that we have an error outside our express application like the database is down
+The error handler that we implemented
+
+for example if we change the database password to wrong password
+
+this error is called Unhandled promise rejection
+this means in our code there is a promise that got rejected and that rejection never got handled
+
+unhandled rejection will terminate the application
+
+for example for our database connection we can add a catch block to the connection like this
+  .catch((err) => console.log('error'));
+
+like this
+mongoose
+  .connect(DB, {
+    useNewUrlParser: true,
+    useCreateIndex: true,
+    useFindAndModify: false,
+  })
+  .then(() => {
+    console.log('DB connection successful');
+  })
+  .catch((err) => console.log('error'));
+
+
+but we can't keep track of all the unhandled rejections in our application
+
+we use event listener to handle unhandled rejections
 like this:
-{"name":"no","ratingsAverage":7}
+process.on('unhandledRejection')
+
+this error handling is called a safety net for your application
+
+we do it like this:
+------------------------------
+process.on('unhandledRejection', (err) => {
+  console.log(err.name, err.message);
+  //to exit our application // we pass it a code // 0 is passed for success // 1 is passed for uncaught exception
+  console.log('UNHANDLED REJECTION! 💥 shutting down...');
+  process.exit(1);
+});
+------------------------------
+process.exit(1) will end the program because this will just immediately abort all the requests that are currently still running or pending
+
+and that is not a good idea 
+
+and what we do is we shutdown gracefully where we first close the server and only then we shut down the application
+
+we fix it like this:
+1- we put the server into a variable than close it
+2- we then shut down the application
 
 
-the output will be:
-{
-    "status": "error",
-    "error": {
-        "errors": {
-            "ratingsAverage": {
-                "name": "ValidatorError",
-                "message": "Rating must be below 5.0",
-                "properties": {
-                    "message": "Rating must be below 5.0",
-                    "type": "max",
-                    "max": 5,
-                    "path": "ratingsAverage",
-                    "value": 7
-                },
-                "kind": "max",
-                "path": "ratingsAverage",
-                "value": 7
-            },
-            "name": {
-                "name": "ValidatorError",
-                "message": "a tour name must have more or equal than 10 characters",
-                "properties": {
-                    "message": "a tour name must have more or equal than 10 characters",
-                    "type": "minlength",
-                    "minlength": 10,
-                    "path": "name",
-                    "value": "no"
-                },
-                "kind": "minlength",
-                "path": "name",
-                "value": "no"
-            }
-        },
-        "_message": "Validation failed",
-        "statusCode": 500,
-        "status": "error",
-        "name": "ValidationError",
-        "message": "Validation failed: ratingsAverage: Rating must be below 5.0, name: a tour name must have more or equal than 10 characters"
-    },
-    "message": "Validation failed: ratingsAverage: Rating must be below 5.0, name: a tour name must have more or equal than 10 characters",
-    "stack": "ValidationError: Validation failed: ratingsAverage: Rating must be below 5.0, name: a tour name must have more or equal than 10 characters\n    at _done (D:\\Projects\\Github\\natours\\node_modules\\mongoose\\lib\\helpers\\updateValidators.js:236:19)\n    at D:\\Projects\\Github\\natours\\node_modules\\mongoose\\lib\\helpers\\updateValidators.js:212:11\n    at schemaPath.doValidate.updateValidator (D:\\Projects\\Github\\natours\\node_modules\\mongoose\\lib\\helpers\\updateValidators.js:170:13)\n    at D:\\Projects\\Github\\natours\\node_modules\\mongoose\\lib\\schematype.js:1273:9\n    at process.processTicksAndRejections (node:internal/process/task_queues:77:11)"
-}
 
-we focus on the name part:
+// this is called a safety net
+process.on('unhandledRejection', (err) => {
+  console.log(err.name, err.message);
+  //to exit our application // we pass it a code // 0 is passed for success // 1 is passed for uncaught exception
+  console.log('UNHANDLED REJECTION! 💥 shutting down...');
+  // on server.close we give the server time to finish all the request that are still pending or being handled at the time and after that the server is killed
+  server.close(() => {
+    process.exit(1);
+  });
+});
 
-    "name": "ValidatorError",
 
-notace we have two validation errors 
-we need to handle that error in production
-the error message is formed correctly so we can use it
-so we need to extract it 
+//usually we have some tool that restart our application after terminate 
+// and sometimes the hosting will restart it for us
