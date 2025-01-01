@@ -1,69 +1,15 @@
-Imagine that we have an error outside our express application like the database is down
-The error handler that we implemented
+uncaught exceptions
 
-for example if we change the database password to wrong password
+all errors that occur in our synchronous code but not handled anywhere are called uncaught exceptions
+so we need to handle them
 
-this error is called Unhandled promise rejection
-this means in our code there is a promise that got rejected and that rejection never got handled
+for example if we are trying to log a variable that is not defined, it will throw an uncaught exception
 
-unhandled rejection will terminate the application
+we do it just like unhandled rejections
 
-for example for our database connection we can add a catch block to the connection like this
-  .catch((err) => console.log('error'));
+in unhandled rejections shutting down our application is optional
 
-like this
-mongoose
-  .connect(DB, {
-    useNewUrlParser: true,
-    useCreateIndex: true,
-    useFindAndModify: false,
-  })
-  .then(() => {
-    console.log('DB connection successful');
-  })
-  .catch((err) => console.log('error'));
+but in uncaught exceptions, it is required because the after we have an uncaught exception the entire node process is in a "unclean state"
+so we need to shut it down to prevent any further damage and then restarted
 
-
-but we can't keep track of all the unhandled rejections in our application
-
-we use event listener to handle unhandled rejections
-like this:
-process.on('unhandledRejection')
-
-this error handling is called a safety net for your application
-
-we do it like this:
-------------------------------
-process.on('unhandledRejection', (err) => {
-  console.log(err.name, err.message);
-  //to exit our application // we pass it a code // 0 is passed for success // 1 is passed for uncaught exception
-  console.log('UNHANDLED REJECTION! 💥 shutting down...');
-  process.exit(1);
-});
-------------------------------
-process.exit(1) will end the program because this will just immediately abort all the requests that are currently still running or pending
-
-and that is not a good idea 
-
-and what we do is we shutdown gracefully where we first close the server and only then we shut down the application
-
-we fix it like this:
-1- we put the server into a variable than close it
-2- we then shut down the application
-
-
-
-// this is called a safety net
-process.on('unhandledRejection', (err) => {
-  console.log(err.name, err.message);
-  //to exit our application // we pass it a code // 0 is passed for success // 1 is passed for uncaught exception
-  console.log('UNHANDLED REJECTION! 💥 shutting down...');
-  // on server.close we give the server time to finish all the request that are still pending or being handled at the time and after that the server is killed
-  server.close(() => {
-    process.exit(1);
-  });
-});
-
-
-//usually we have some tool that restart our application after terminate 
-// and sometimes the hosting will restart it for us
+we should put this event listener on the top of the server efore usig the node application 

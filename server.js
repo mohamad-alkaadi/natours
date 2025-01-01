@@ -1,5 +1,12 @@
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+
+process.on('uncaughtException', (err) => {
+  console.log('UNCAUGHT EXCEPTION! 💥 shutting down...');
+  console.log(err.name, err.message);
+  process.exit(1);
+});
+
 dotenv.config({ path: './config.env' });
 const app = require('./app');
 const DB = process.env.DATABASE.replace(
@@ -23,9 +30,9 @@ const server = app.listen(port, () => {
 
 // this is called a saifty net
 process.on('unhandledRejection', (err) => {
+  console.log('UNHANDLED REJECTION! 💥 shutting down...');
   console.log(err.name, err.message);
   //to exit our application // we pass it a code // 0 is passed for success // 1 is passed for uncaught exception
-  console.log('UNHANDLED REJECTION! 💥 shutting down...');
   // on server.close we give the server time to finish all the request that are still pending or being handled at the time and after that the server is killed
   server.close(() => {
     process.exit(1);
