@@ -1,15 +1,3 @@
-uncaught exceptions
+Authentication and authorization s all about users signing up logging in or accessing pages and routes that we grant them permission to do so
 
-all errors that occur in our synchronous code but not handled anywhere are called uncaught exceptions
-so we need to handle them
-
-for example if we are trying to log a variable that is not defined, it will throw an uncaught exception
-
-we do it just like unhandled rejections
-
-in unhandled rejections shutting down our application is optional
-
-but in uncaught exceptions, it is required because the after we have an uncaught exception the entire node process is in a "unclean state"
-so we need to shut it down to prevent any further damage and then restarted
-
-we should put this event listener on the top of the server efore usig the node application 
+so we want to start by creating a user model that will handle all of this for us
