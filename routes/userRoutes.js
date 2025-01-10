@@ -1,8 +1,13 @@
 const express = require('express');
 const userController = require('../controllers/userController');
+const authController = require('../controllers/authController');
 
 const router = express.Router();
 
+//but in authentication we have to break the REST rules
+router.post('/signup', authController.signup);
+
+//here we apply the REST philosophy that the where the name of the url has nothing to do with the action performed
 router
   .route('/')
   .get(userController.getAllUsers)
