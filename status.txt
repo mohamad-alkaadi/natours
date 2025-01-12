@@ -1,3 +1,4 @@
-Authentication and authorization s all about users signing up logging in or accessing pages and routes that we grant them permission to do so
-
-so we want to start by creating a user model that will handle all of this for us
+we have a problem that users passwords are appearing in the database
+and and it is an important security rule that we cant store the passwords in database
+first we want to confirm if the inputted password is equal to the confirmed password
+and we want to encrypt the password in the database to prevent it from being seen by others
