@@ -1,4 +1,20 @@
-we have a problem that users passwords are appearing in the database
-and and it is an important security rule that we cant store the passwords in database
-first we want to confirm if the inputted password is equal to the confirmed password
-and we want to encrypt the password in the database to prevent it from being seen by others
+we want to log the users in 
+
+
+when we have implemented signup before like this:
+
+exports.signup = catchAsync(async (req, res, next) => {
+  const newUser = await User.create(req.body);
+
+  res.status(201).json({
+    status: 'success',
+    data: {
+      user: newUser,
+    },
+  });
+});
+
+what is wrong with this method is that we take the whole req.body to sign up the user, if user want to sign up as admin he can do so
+
+
+the jsonwebtoken package include the signing and the verification
