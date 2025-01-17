@@ -24,6 +24,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Please provide a password'],
     minlength: 8,
+    select: false,
   },
   passwordConfirm: {
     type: String,
@@ -74,6 +75,20 @@ userSchema.pre('save', async function (next) {
   this.passwordConfirm = undefined;
   next();
 });
+
+//instance method
+userSchema.methods.correctPassword = async function (
+  candidatePassword,
+  userPassword
+) {
+  // inside the instance method the this keyword points to the current document
+  // the select on the password is false so we cant use this.password so we need to pass the password using a parameter for the function
+  // the goal of this function is to return true or false
+  // true if the passwords is the same and false if not
+  // the bcrypt.compare is a simple method to compare encrypted password with unencrypted passwords
+  // we can call this function from the controller
+  return await bcrypt.compare(candidatePassword, userPassword);
+};
 
 // create Model out of the Schema
 const User = mongoose.model('User', userSchema);

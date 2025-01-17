@@ -28,7 +28,7 @@ const server = app.listen(port, () => {
   console.log(`app running ono port ${port}`);
 });
 
-// this is called a saifty net
+// this is called a safety net
 process.on('unhandledRejection', (err) => {
   console.log('UNHANDLED REJECTION! 💥 shutting down...');
   console.log(err.name, err.message);

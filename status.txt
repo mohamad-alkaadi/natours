@@ -1,20 +1,24 @@
-we want to log the users in 
+wwe are going to implement the functionality of logging users in based on their password and email address
 
 
-when we have implemented signup before like this:
+the concept of logging a user in means to sign a JSON web token and send it back to the client
 
-exports.signup = catchAsync(async (req, res, next) => {
-  const newUser = await User.create(req.body);
-
-  res.status(201).json({
-    status: 'success',
-    data: {
-      user: newUser,
-    },
-  });
-});
-
-what is wrong with this method is that we take the whole req.body to sign up the user, if user want to sign up as admin he can do so
+and we only issue the token in case that the user actually exists, and the password is correct
 
 
-the jsonwebtoken package include the signing and the verification
+
+//we want to change something about the createUser that when we create a user it returns the password encrypted
+to solve this by adding to usermodel in the password field we add     select: false,
+
+
+------------------------------
+  const user = await User.findOne({ email }).select('+password');
+  //the password returned from the database for example is: $2a$12$HEWl18Go5c5Tp.dFxuQzjePEDAUwRHrSH/BpANFgDGAYD.yobz5yK
+  // and we entered the this password for example: password12345
+  // we need to encrypt the password the interred by the user then compere it with the password that is entered in the database
+  // then compare the original encrypted password with the encrypted password that we got from the user
+  // we can implement this in the userModel to make our controller slimmer
+
+to do this we will create something called an instance method and it is defined on a Schema in the model
+instance method: is a method that is gonna be available on all documents of a certain collection
+  ---------------------------
