@@ -84,3 +84,37 @@ exports.login = catchAsync(async (req, res, next) => {
     token,
   });
 });
+
+exports.protect = catchAsync(async (req, res, next) => {
+  // 1) Getting the token and check if it exists
+  // these conditions  that we should meet to save the token
+  let token;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    // the return of the req.headers.authorization is: Bearer dsajkfjkhsajkdh24kjakdjsakj21kekja
+    // so we need to split it by the space and the return is the array of two items [Bearer,dsajkfjkhsajkdh24kjakdjsakj21kekja]
+    // then we select the secund item from the array like this [1]
+    token = req.headers.authorization.split(' ')[1];
+  }
+  console.log('token is:', token);
+
+  if (!token) {
+    return next(
+      // 401 means the data that we have sent with the request is correct but they are not enough to get the user access to the resource that he is requesting
+      new AppError('Your are not logged in! Please log in to get access', 401)
+    );
+  }
+
+  // 2) validate token: the JWT algorithms verifies if the signature is valid or if it's not or if the token is valid or not
+
+  // if the verification is successful we also need to check if the user who's trying to access the route still exists
+
+  // 3) Check if user still exists
+
+  // 4) Check if the user changed password after the JWT token was issued
+
+  // if all steps are correct then we hit next so we can continue to the handler function
+  next();
+});

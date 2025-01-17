@@ -23,6 +23,10 @@ app.use(express.static(`${__dirname}/public`));
 app.use((req, res, next) => {
   // define a property on the request object
   req.requestTime = new Date().toISOString();
+
+  // we want to receive the req.headers so we can access the token sent from the client with the header
+  // console.log(req.headers);
+
   next();
 });
 

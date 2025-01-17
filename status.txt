@@ -1,24 +1,22 @@
-wwe are going to implement the functionality of logging users in based on their password and email address
+we have completed the the first step of authentication 
+we have logged the user in and the JSON web token is created and sent back to the client if the user provides a correct email and password
+
+next step we will implement protected routes 
+meaning we use the JSON web token to give the logged in users access to the protected route 
+
+for example we want to protect the getAllTours controller
+before running the route handler we want to check if the user is logged in or not 
+and the best way of doing that is using a middleware function
 
 
-the concept of logging a user in means to sign a JSON web token and send it back to the client
 
-and we only issue the token in case that the user actually exists, and the password is correct
-
+a common practice is to send a token using an http header with the request
 
 
-//we want to change something about the createUser that when we create a user it returns the password encrypted
-to solve this by adding to usermodel in the password field we add     select: false,
+the standard way to do so is call it authentication header in the key
 
+and in the value we start with: Bearer, then the value of the token
 
-------------------------------
-  const user = await User.findOne({ email }).select('+password');
-  //the password returned from the database for example is: $2a$12$HEWl18Go5c5Tp.dFxuQzjePEDAUwRHrSH/BpANFgDGAYD.yobz5yK
-  // and we entered the this password for example: password12345
-  // we need to encrypt the password the interred by the user then compere it with the password that is entered in the database
-  // then compare the original encrypted password with the encrypted password that we got from the user
-  // we can implement this in the userModel to make our controller slimmer
+Bearer means we possess the token
 
-to do this we will create something called an instance method and it is defined on a Schema in the model
-instance method: is a method that is gonna be available on all documents of a certain collection
-  ---------------------------
+ex: Bearer dsajkfjkhsajkdh24kjakdjsakj21kekja
