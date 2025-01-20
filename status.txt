@@ -20,3 +20,8 @@ and in the value we start with: Bearer, then the value of the token
 Bearer means we possess the token
 
 ex: Bearer dsajkfjkhsajkdh24kjakdjsakj21kekja
+
+
+---------------------
+when we try to manipulate the payload it returns an invalid signature so need handle it 
+so we can make a try catch block

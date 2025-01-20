@@ -43,6 +43,12 @@ const userSchema = new mongoose.Schema({
       message: 'Passwords are not the same!',
     },
   },
+  // this field we put when the password has last changed
+  // this will be changed when someone changes his password
+  passwordChangedAt: {
+    type: Date,
+    default: Date.now(),
+  },
 });
 
 //to incript the password we incrpt irt on the model so we can keep the thin controller and fat model concept
@@ -90,6 +96,22 @@ userSchema.methods.correctPassword = async function (
   return await bcrypt.compare(candidatePassword, userPassword);
 };
 
+//instance method for if the password has changed
+// time stamp is when the token has issued
+// if this method returns false that means the user has not changed his password after the token was issued
+userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
+  // if this.passwordChangedAt does not exists this means that the user hav never changed his password
+  if (this.passwordChangedAt) {
+    const changedTimestamp = parseInt(
+      this.passwordChangedAt.getTime() / 1000,
+      10
+    );
+    console.log(changedTimestamp, JWTTimestamp);
+    return JWTTimestamp < changedTimestamp; // jwt issued at time 100 < changed at time 200
+  }
+  // false means not changed
+  return false;
+};
 // create Model out of the Schema
 const User = mongoose.model('User', userSchema);
 
